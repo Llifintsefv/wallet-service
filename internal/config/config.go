@@ -25,7 +25,6 @@ func NewConfig() (*Config, error) {
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
 	dbSSLMode := os.Getenv("DB_SSL_MODE")
-	
 
 	if dbHost == "" || dbPort == "" || dbUser == "" || dbPassword == "" || dbName == "" || dbSSLMode == "" {
 		slog.Error("DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSL_MODE must be set")
@@ -38,6 +37,7 @@ func NewConfig() (*Config, error) {
 	if port == "" {
 		port = "8080"
 	}
+	port = ":" + port
 
 	return &Config{
 		DBConnStr: connStr,

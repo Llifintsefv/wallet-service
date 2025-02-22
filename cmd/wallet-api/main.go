@@ -37,9 +37,9 @@ func main() {
 	}
 	defer db.Close()
 
-	repository := postgres.NewRepository(db, *logger)
-	service := service.NewService(repository, *logger)
-	handler := handler.NewHandler(service, *logger)
+	repository := postgres.NewRepository(db, logger)
+	service := service.NewService(repository, logger)
+	handler := handler.NewHandler(service, logger)
 
 	app := router.SetupRouter(*handler)
 

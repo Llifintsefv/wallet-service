@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:latest
@@ -8,6 +6,11 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - '${DB_PORT}:5432'
     volumes:
@@ -17,17 +20,33 @@ services:
     image: migrate/migrate
     restart: on-failure
     depends_on:
-      - db
+      db:
+        condition: service_healthy # Ждем, пока db будет "здоров"
     volumes:
       - ./migrations:/migrations
-    command:
-      [
+    command: [
         '-path',
         '/migrations',
         '-database',
-        'postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable',
+        'postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable', # Используем "db"
         'up',
       ]
+
+  app:
+    build: .
+    restart: always
+    depends_on:
+      - db
+      - migrate # Запускаем после db и migrate
+    ports:
+      - '${APP_PORT}:8080'
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: db # Используем "db"
+      DB_PORT: 5432
+      APP_PORT: 8080
 
 volumes:
   postgres_data:
