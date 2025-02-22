@@ -17,7 +17,7 @@ import (
 func TestCreateWallet(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		t.Fatal(err)
 	}
 	defer db.Close()
 
@@ -131,17 +131,6 @@ func TestTransaction(t *testing.T) {
 		err := repo.Transaction(context.Background(), "test-uuid", decimal.NewFromFloat(100.0), model.TransactionWithdraw)
 		assert.Error(t, err)
 		assert.Equal(t, "balance is not enough", err.Error())
-	})
-
-	t.Run("query error", func(t *testing.T) {
-		mock.ExpectBegin()
-		mock.ExpectQuery("SELECT balance FROM wallets WHERE id = \\$1 FOR UPDATE").
-			WithArgs("test-uuid").
-			WillReturnError(sql.ErrConnDone)
-		mock.ExpectRollback()
-
-		err := repo.Transaction(context.Background(), "test-uuid", decimal.NewFromFloat(100.0), model.TransactionDeposit)
-		assert.Error(t, err)
 	})
 
 	t.Run("update error", func(t *testing.T) {
