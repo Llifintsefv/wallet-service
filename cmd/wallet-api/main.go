@@ -22,7 +22,6 @@ func main() {
 	slog.SetDefault(logger)
 
 	cfg, err := config.NewConfig()
-	fmt.Println(cfg)
 
 	if err != nil {
 		slog.Error("failed to load config", "error", err)
