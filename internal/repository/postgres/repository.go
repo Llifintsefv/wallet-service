@@ -58,7 +58,7 @@ func (r *repository) GetBalanceByUuid(ctx context.Context, uuid string) (decimal
 
 }
 
-func (r *repository) Transaction(ctx context.Context, uuid string, amount decimal.Decimal, op string) error {
+func (r *repository) Transaction(ctx context.Context, uuid string, amount decimal.Decimal, op string) (err error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("begin transaction: %w", err)
@@ -66,9 +66,9 @@ func (r *repository) Transaction(ctx context.Context, uuid string, amount decima
 
 	defer func() {
 		if err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 		} else {
-			tx.Commit()
+			_ = tx.Commit()
 		}
 	}()
 
@@ -79,7 +79,8 @@ func (r *repository) Transaction(ctx context.Context, uuid string, amount decima
 	}
 
 	if op == model.TransactionWithdraw && balance.LessThan(amount) {
-		return fmt.Errorf("balance is not enough")
+		err = fmt.Errorf("balance is not enough")
+		return err
 	}
 
 	if op == model.TransactionDeposit {
@@ -88,7 +89,7 @@ func (r *repository) Transaction(ctx context.Context, uuid string, amount decima
 		balance = balance.Sub(amount)
 	}
 
-	_, err = tx.ExecContext(ctx, "UPDATE wallets SET balance = $1 WHERE id = $2", balance, uuid)
+	_, err = tx.ExecContext(ctx, "UPDATE wallets SET balance = $1 WHERE id = $2", balance.StringFixed(2), uuid)
 	if err != nil {
 		return fmt.Errorf("update balance: %w", err)
 	}

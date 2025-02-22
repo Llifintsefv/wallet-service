@@ -13,7 +13,7 @@ type Transaction struct {
 }
 
 type TransactionRequest struct {
-	Uuid          string `json:"uuid"`
+	ValletId      string `json:"valletId"`
 	OperationType string `json:"operationType"`
 	Amount        string `json:"amount"`
 }

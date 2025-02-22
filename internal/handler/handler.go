@@ -47,7 +47,7 @@ func (h *Handler) Transaction(c *fiber.Ctx) error {
 	}
 
 	transaction := model.Transaction{
-		Uuid:          req.Uuid,
+		Uuid:          req.ValletId,
 		OperationType: req.OperationType,
 		Amount:        amount,
 	}
