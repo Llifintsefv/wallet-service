@@ -8,12 +8,12 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -o main cmd/wallet-api/main.go
 RUN ls -l /app
 
 
-FROM alpine:latest
+FROM postgres:latest
 WORKDIR /app
 
-RUN apk add --no-cache ca-certificates
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 COPY --from=builder /app/main .
-COPY --from=builder /app/.env .
+COPY --from=builder /app/config.env .
 RUN ls -l /app
 EXPOSE 8080
 CMD ["./main"]
